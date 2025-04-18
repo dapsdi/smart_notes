@@ -30,12 +30,29 @@ def add_note():
         else:
             print("Замітка з такою назвою вже існує.")
 
+def del_note():
+    selected_note = window.notes_list.currentItem()
+    if selected_note:
+        note_name = selected_note.text()
+        notes.pop(note_name, None)
+        with open("notes_data.json", "w", encoding = "utf-8") as file:
+            json.dump(notes, file, ensure_ascii=False, indent=4)
+
+        window.notes_list.clear()
+        window.notes_list.addItems(notes) #оновлення списку заміток
+        window.text_field.clear()
+        window.tag_list.clear()
+    else:
+        print("Спочатку виберіть замітку для видалення.")
 
 with open("notes_data.json", "r", encoding = "utf-8") as file:
     notes = json.load(file)
 
 window.notes_list.addItems(notes)
 
+#Прив'язка кнопок до функцій
 window.btn_create_note.clicked.connect(add_note)
+window.btn_delete_note.clicked.connect(del_note)
+
 
 app.exec_() 
