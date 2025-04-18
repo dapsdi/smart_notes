@@ -16,7 +16,7 @@ def show_note():
         window.tag_list.clear()
         window.tag_list.addItems(note_tags)
         
-        window.notes_list.itemClicked.connect(show_note)
+        
 
 
 def add_note():
@@ -25,6 +25,7 @@ def add_note():
     if ok and note_name:
         if note_name not in notes:
             notes[note_name] = {"текст": "", "теги": []}
+            window.notes_list.addItem(note_name)
             window.tag_list.addItems(notes[note_name]["теги"])
             print("Додано нову замітку:", note_name)
         else:
@@ -53,6 +54,6 @@ window.notes_list.addItems(notes)
 #Прив'язка кнопок до функцій
 window.btn_create_note.clicked.connect(add_note)
 window.btn_delete_note.clicked.connect(del_note)
-
+window.notes_list.itemClicked.connect(show_note)
 
 app.exec_() 
