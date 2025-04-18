@@ -46,6 +46,17 @@ def del_note():
     else:
         print("Спочатку виберіть замітку для видалення.")
 
+def save_notes():
+    selected_note = window.notes_list.currentItem() #отримання вибраної замітки
+
+    if selected_note:  #якщо вибрано замітку
+        note_name = selected_note.text() #отримання назви замітки
+        notes[note_name]["текст"] = window.text_field.toPlainText() #збереження тексту замітки
+        with open("notes_data.json", "w", encoding = "utf-8") as file:
+            json.dump(notes, file, ensure_ascii=False, indent=4)
+    else:
+        print("Спочатку виберіть замітку для збереження.")
+
 with open("notes_data.json", "r", encoding = "utf-8") as file:
     notes = json.load(file)
 
@@ -55,5 +66,7 @@ window.notes_list.addItems(notes)
 window.btn_create_note.clicked.connect(add_note)
 window.btn_delete_note.clicked.connect(del_note)
 window.notes_list.itemClicked.connect(show_note)
+window.btn_save_note.clicked.connect(save_notes)
 
+window.show()
 app.exec_() 

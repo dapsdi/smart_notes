@@ -54,7 +54,6 @@ class SmartNotes(QWidget):
 
         right_layout.addWidget(self.write_tag)
         right_layout.addWidget(self.btn_add_tag)
-        right_layout.addWidget(self.btn_delete_note)
         right_layout.addWidget(self.btn_search_tag)
 
         # Головне компонування
@@ -67,5 +66,3 @@ class SmartNotes(QWidget):
 #запуск
 app = QApplication([])
 window = SmartNotes()
-window.show()
-app.exec_()
