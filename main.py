@@ -57,6 +57,27 @@ def save_notes():
     else:
         print("Спочатку виберіть замітку для збереження.")
 
+def add_tag():
+    selected_note = window.notes_list.currentItem() #отримання вибраної замітки
+    if selected_note:
+        note_name = selected_note.text() #отримання назви замітки
+        tag_text = window.write_tag.text().strip() #отримання тексту тегу 
+        if tag_text: #якщо тег не пустий
+            if tag_text not in notes[note_name]["теги"]:
+                notes[note_name]["теги"].append(tag_text)
+                window.tag_list.addItem(tag_text)
+                window.write_tag.clear()
+
+                with open("notes_data.json", "w", encoding = "utf-8") as file:
+                    json.dump(notes, file, ensure_ascii=False, indent=4)
+                print("Тег додано:", tag_text)
+            else:
+                print("Тег вже існує в замітці.")
+        else:
+            print("Тег не може бути пустим.")
+    else:
+        print("Спочатку виберіть замітку для додавання тегу.")        
+
 with open("notes_data.json", "r", encoding = "utf-8") as file:
     notes = json.load(file)
 
