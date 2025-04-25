@@ -22,14 +22,16 @@ def show_note():
 def add_note():
     note_name, ok = QInputDialog.getText(window, "Додати замітку", "Назва замітки:")
 
-    if ok and note_name:
-        if note_name not in notes:
+    if ok and note_name: #якщо натиснуто "OK" і введено назву
+        if note_name not in notes: #якщо замітка з такою назвою ще не існує
             notes[note_name] = {"текст": "", "теги": []}
             window.notes_list.addItem(note_name)
             window.tag_list.addItems(notes[note_name]["теги"])
             print("Додано нову замітку:", note_name)
         else:
-            print("Замітка з такою назвою вже існує.")
+            print(f"Замітка з назвою '{note_name}' вже існує.")
+    else:
+        print("Створення замітки скасовано або назва не введена.")
 
 def del_note():
     selected_note = window.notes_list.currentItem()
@@ -43,6 +45,7 @@ def del_note():
         window.notes_list.addItems(notes) #оновлення списку заміток
         window.text_field.clear()
         window.tag_list.clear()
+        print("Замітка видалена:", note_name)
     else:
         print("Спочатку виберіть замітку для видалення.")
 
@@ -54,6 +57,7 @@ def save_notes():
         notes[note_name]["текст"] = window.text_field.toPlainText() #збереження тексту замітки
         with open("notes_data.json", "w", encoding = "utf-8") as file:
             json.dump(notes, file, ensure_ascii=False, indent=4)
+        print("Замітка збережена:", note_name)
     else:
         print("Спочатку виберіть замітку для збереження.")
 
@@ -109,6 +113,7 @@ window.btn_create_note.clicked.connect(add_note)
 window.btn_delete_note.clicked.connect(del_note)
 window.notes_list.itemClicked.connect(show_note)
 window.btn_save_note.clicked.connect(save_notes)
+
 window.btn_add_tag.clicked.connect(add_tag)
 window.btn_delete_tag.clicked.connect(del_tag)
 
