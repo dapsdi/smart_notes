@@ -14,11 +14,8 @@ def show_note():
 
         window.text_field.setPlainText(note_content)
         window.tag_list.clear()
-        window.tag_list.addItems(note_tags)
+        window.tag_list.addItems(note_tags)     
         
-        
-
-
 def add_note():
     note_name, ok = QInputDialog.getText(window, "Додати замітку", "Назва замітки:")
 
