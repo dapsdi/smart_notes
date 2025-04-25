@@ -61,22 +61,43 @@ def add_tag():
     selected_note = window.notes_list.currentItem() #отримання вибраної замітки
     if selected_note:
         note_name = selected_note.text() #отримання назви замітки
-        tag_text = window.write_tag.text().strip() #отримання тексту тегу 
-        if tag_text: #якщо тег не пустий
-            if tag_text not in notes[note_name]["теги"]:
-                notes[note_name]["теги"].append(tag_text)
-                window.tag_list.addItem(tag_text)
+        selected_tag = window.write_tag.text().strip() #отримання тексту тегу 
+        if selected_tag: #якщо тег не пустий
+            if selected_tag not in notes[note_name]["теги"]:
+                notes[note_name]["теги"].append(selected_tag)
+                window.tag_list.addItem(selected_tag)
                 window.write_tag.clear()
 
                 with open("notes_data.json", "w", encoding = "utf-8") as file:
                     json.dump(notes, file, ensure_ascii=False, indent=4)
-                print("Тег додано:", tag_text)
+                print("Тег додано:", selected_tag)
             else:
                 print("Тег вже існує в замітці.")
         else:
             print("Тег не може бути пустим.")
     else:
-        print("Спочатку виберіть замітку для додавання тегу.")        
+        print("Спочатку виберіть замітку для додавання тегу.")    
+
+def del_tag():
+    selected_note = window.notes_list.currentItem() #отримання вибраної замітки
+    if selected_note: #якщо вибрано замітку
+        note_name = selected_note.text() #отримання назви замітки
+        selected_tag = window.tag_list.currentItem() #отримання вибраного тегу
+        if selected_tag: #якщо тег вибрано
+            tag_text = selected_tag.text() #отримання тексту тегу
+            if tag_text in notes[note_name]["теги"]: #якщо тег є в словнику
+                notes[note_name]["теги"].remove(selected_tag) #видалення тегу з словника
+                window.tag_list.takeItem(window.tag_list.row(selected_tag)) #видалення тегу з списку
+                
+                with open("notes_data.json", "w", encoding = "utf-8") as file:
+                    json.dump(notes, file, ensure_ascii=False, indent=4)
+                print("Тег видалено:", tag_text)
+            else:
+                print("Тег не знайдено в замітці.")
+        else:
+            print("Тег не вибрано")
+    else:
+        print("Замітку не вибрано")    
 
 with open("notes_data.json", "r", encoding = "utf-8") as file:
     notes = json.load(file)
