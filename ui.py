@@ -55,6 +55,7 @@ class SmartNotes(QWidget):
         right_layout.addWidget(self.write_tag)
         right_layout.addWidget(self.btn_add_tag)
         right_layout.addWidget(self.btn_search_tag)
+        right_layout.addWidget(self.btn_delete_tag)
 
         # Головне компонування
         main_layout = QHBoxLayout()

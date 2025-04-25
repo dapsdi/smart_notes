@@ -61,16 +61,16 @@ def add_tag():
     selected_note = window.notes_list.currentItem() #отримання вибраної замітки
     if selected_note:
         note_name = selected_note.text() #отримання назви замітки
-        selected_tag = window.write_tag.text().strip() #отримання тексту тегу 
-        if selected_tag: #якщо тег не пустий
-            if selected_tag not in notes[note_name]["теги"]:
-                notes[note_name]["теги"].append(selected_tag)
-                window.tag_list.addItem(selected_tag)
+        tag_text = window.write_tag.text().strip() #отримання тексту тегу 
+        if tag_text: #якщо тег не пустий
+            if tag_text not in notes[note_name]["теги"]:
+                notes[note_name]["теги"].append(tag_text)
+                window.tag_list.addItem(tag_text)
                 window.write_tag.clear()
 
                 with open("notes_data.json", "w", encoding = "utf-8") as file:
                     json.dump(notes, file, ensure_ascii=False, indent=4)
-                print("Тег додано:", selected_tag)
+                print("Тег:", tag_text, "додано до замітки:", note_name)
             else:
                 print("Тег вже існує в замітці.")
         else:
@@ -86,12 +86,12 @@ def del_tag():
         if selected_tag: #якщо тег вибрано
             tag_text = selected_tag.text() #отримання тексту тегу
             if tag_text in notes[note_name]["теги"]: #якщо тег є в словнику
-                notes[note_name]["теги"].remove(selected_tag) #видалення тегу з словника
+                notes[note_name]["теги"].remove(tag_text) #видалення тегу з словника
                 window.tag_list.takeItem(window.tag_list.row(selected_tag)) #видалення тегу з списку
                 
                 with open("notes_data.json", "w", encoding = "utf-8") as file:
                     json.dump(notes, file, ensure_ascii=False, indent=4)
-                print("Тег видалено:", tag_text)
+                print("Тег :", tag_text, "видалено з замітки:", note_name)
             else:
                 print("Тег не знайдено в замітці.")
         else:
@@ -109,6 +109,8 @@ window.btn_create_note.clicked.connect(add_note)
 window.btn_delete_note.clicked.connect(del_note)
 window.notes_list.itemClicked.connect(show_note)
 window.btn_save_note.clicked.connect(save_notes)
+window.btn_add_tag.clicked.connect(add_tag)
+window.btn_delete_tag.clicked.connect(del_tag)
 
 window.show()
 app.exec_() 
