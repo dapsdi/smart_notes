@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QListWidget,
-    QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QInputDialog
+    QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QInputDialog, QMessageBox
 )
 
 import os
@@ -13,12 +13,13 @@ class SmartNotes(QWidget):
         self.setWindowTitle("Розумні Замітки")
         self.resize(800, 600)
 
-        # основні елементи
+        #основні елементи
         self.text_field = QTextEdit()
         self.text_field.setPlaceholderText("Введіть текст замітки...")
 
         self.notes_list = QListWidget()
-
+        
+        #кнопки
         self.btn_create_note = QPushButton("Створити замітку")
         self.btn_delete_note = QPushButton("Видалити замітку")
         self.btn_save_note = QPushButton("Зберегти замітку")
@@ -30,35 +31,51 @@ class SmartNotes(QWidget):
         self.btn_add_tag = QPushButton("Додати до замітки")
         self.btn_delete_tag = QPushButton("Відкріпити з замітки")
         self.btn_search_tag = QPushButton("Шукати за тегом")
+        self.btn_clear_tags = QPushButton("Очистити теги")
 
-        # права частина
+        self.btn_export_csv = QPushButton("Експортувати в CSV")
+        self.btn_import_csv = QPushButton("Імпортувати з CSV")
+
+        #права частина
         right_layout = QVBoxLayout()
         right_layout.addWidget(QLabel("Список заміток"))
         right_layout.addWidget(self.notes_list)
         right_layout.addWidget(self.btn_create_note)
         right_layout.addWidget(self.btn_save_note)
         right_layout.addWidget(self.btn_delete_note)
+        
         right_layout.addWidget(QLabel("Список тегів"))
         right_layout.addWidget(self.tag_list)
         right_layout.addWidget(self.write_tag)
         right_layout.addWidget(self.btn_add_tag)
         right_layout.addWidget(self.btn_search_tag)
         right_layout.addWidget(self.btn_delete_tag)
+        right_layout.addWidget(self.btn_clear_tags)
 
-        # головне компонування
+        right_layout.addWidget(self.btn_export_csv)
+        right_layout.addWidget(self.btn_import_csv)
+
+        #головне компонування
+
+        # Ліва частина: поле для тексту з підписом
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(QLabel("Текст замітки"))
+        left_layout.addWidget(self.text_field)
+
+
         main_layout = QHBoxLayout()
-        main_layout.addWidget(self.text_field, 2)
+        main_layout.addLayout(left_layout, 2) #2 - це відносна вага, яка визначає, скільки місця займатиме ця частина
         main_layout.addLayout(right_layout, 1)
         self.setLayout(main_layout)
 
-# запуск
+#запуск
 app = QApplication([])
 window = SmartNotes()
 
-notes = []  # тут буде список типу: [[назва, текст, [теги]], ...]
+notes = []  #тут буде список типу: [[назва, текст, [теги]], ...]
 number_note = 0
 
-# Завантаження заміток із файлів
+#завантаження заміток із файлів
 while True:
     filename = f"{number_note}.txt"
     try:
@@ -75,8 +92,11 @@ while True:
     except IOError:
         break
 
-# Показ замітки при натисканні
+#показ замітки при натисканні
 def show_note():
+
+    save_note() #зберігаємо замітку перед показом нової
+
     selected_items = window.notes_list.selectedItems() #отримуємо вибраний елемент
     if selected_items: #якщо вибрано елемент
         key = selected_items[0].text() #отримуємо текст вибраного елемента
@@ -88,7 +108,7 @@ def show_note():
                 
                 break #виходимо з циклу, якщо знайшли замітку для редагування
 
-# Додавання нової замітки
+#додавання нової замітки
 def add_note():
     note_name, ok = QInputDialog.getText(window, "Додати замітку", "Назва замітки:")
     if ok and note_name:
@@ -102,6 +122,7 @@ def add_note():
             file.write("\n")  # пусті теги
         print(f"Замітку '{note_name}' створено та збережено як {file_index}.txt")
 
+#збереження замітки
 def save_note():
     selected_item = window.notes_list.selectedItems() #отримуємо вибраний елемент
     if selected_item: 
@@ -120,6 +141,7 @@ def save_note():
                 #Цей рядок — ключовий для збереження тегів, бо він збирає актуальний список з інтерфейсу
                 #і записує у структуру note, яку потім можна зберігати у файл та перетворювати в JSON, CSV
 
+#видалення замітки
 def delete_note():
     selected_item = window.notes_list.selectedItems() #отримуємо вибраний елемент
     if selected_item:
@@ -128,6 +150,15 @@ def delete_note():
             if note[0] == note_name: #якщо назва замітки співпадає з вибраною
                 filename = f"{note}.txt" #формуємо назву файлу  i - індекс замітки
                 if os.path.exists(filename): #перевіряємо, чи файл існує
+                    
+                    reply = QMessageBox.question(
+                        window, "Підтвердження видалення",
+                        f"Ви впевнені, що хочете видалити замітку '{note_name}'?",
+                        QMessageBox.Yes | QMessageBox.No,
+                    )
+                    if reply == QMessageBox.No:
+                        return #якщо натиснули "Ні", виходимо з функції
+
                     os.remove(filename) #видаляємо файл
                     print(f"Замітку '{note_name}' видалено.")
                 notes.pop(notes.index(note)) #видаляємо замітку з пам'яті
@@ -137,6 +168,7 @@ def delete_note():
                 
                 break #виходимо з циклу, якщо знайшли замітку для редагування
 
+#додавання тегу
 def add_tag():
     selected_item = window.notes_list.selectedItems() #отримуємо вибраний елемент
     if selected_item:
@@ -165,7 +197,7 @@ def add_tag():
                     #це перевірка: знайди ту замітку яка зараз обрана 
                     #і якщо в ній ще немає введеного тегу тоді додавай
 
-
+#видалення тегу
 def delete_tag():
     note_names = window.notes_list.selectedItems() #отримуємо вибраний елемент
     tag_names = window.tag_list.selectedItems() #отримуємо вибраний тег
@@ -187,12 +219,94 @@ def delete_tag():
                     file.write(" ".join(note[2]) + "\n") #записати теги в один рядок чере пробіл
                 print(f"Тег '{tag_name}' видалено з замітки '{note_name}'.")
                 
-                break #виходимо з циклу, якщо знайшли замітку для редагування    
+                break #виходимо з циклу, якщо знайшли замітку для редагування
 
+def clear_tags():
+    selected_item = window.notes_list.selectedItems() #отримуємо вибраний елемент
+    if selected_item:
+        note_name = selected_item[0].text() #отримуємо текст вибраного елемента
+        for note in notes:
+            if note[0] == note_name: #якщо назва замітки співпадає з вибраною
+                note[2]= [] #очищаємо список тегів
+                window.tag_list.clear() #очищаємо список тегів
 
+                filename = f"{notes.index(note)}.txt" #формуємо назву файлу
+                with open(filename, "w", encoding="utf-8") as file:
+                    file.write(note[0] + "\n") #записати назву
+                    file.write(note[1] + "\n") #записати текст
+                    file.write("\n") #пусті теги
+                    print(f"Теги очищено з замітки '{note_name}'.") 
+                
+                break #виходимо з циклу, якщо знайшли замітку для редагування
 
+#експорт у CSV    
+def export_to_csv(): #Ця функція бере всі замітки, які зараз є в пам’яті (у списку notes), 
+                     #і зберігає їх у файл notes.csv, щоб потім можна було знову завантажити.
+
+    with open("notes.csv", "w", encoding="utf-8", newline="") as file: #newline="": запобігає додатковим порожнім рядкам між записами у Windows. 
+                                                                       #без цього в CSV-файлі могли б з'являтись зайві рядки
+        
+        writer = csv.writer(file) #створює об'єкт writer який дозволяє записувати рядки у CSV файл (по суті — як таблицю)
+        
+        writer.writerow(["Назва", "Текст", "Теги"]) #writerow() це метод для запису одного рядка у CSV файл
+        
+        for note in notes: #перебираємо список notes; 
+                           #Кожна замітка це список: [назва, текст, [теги]]
+
+            writer.writerow([note[0], note[1], " ".join(note[2])]) # " ".join(note[2]): перетворює список тегів на один рядок, розділений пробілами (щоб записати у файл)
+                                                                   #(наприклад, ["важливо", "робота"] → "важливо робота")
+    print("Усі замітки експортовано у notes.csv")
+
+#імпорт з CSV
+def import_from_csv(): #ця функція читає файл notes.csv 
+                       #і завантажує всі замітки назад у програму додаючи їх до інтерфейсу
+
+                       #1. відкриває notes.csv для читання
+
+                       #2. csv.DictReader(file) читає файл як словники:
+                       #{"Назва": ..., "Текст": ..., "Теги": ...}
+                    
+                       #3.для кожного рядка:
+                            # зчитує назву, текст і теговий рядок.
+                            # .split() перетворює теговий рядок у список
+
+                       #4. додає замітку до списку notes
+
+                       #5. виводить назву замітки в графічному інтерфейсі (notes_list). 
+
+    if os.path.exists("notes.csv"):
+        with open ("notes.csv", "r", encoding="utf-8") as file:
+            reader = csv.Dictreader(file) #DictReader читає кожен рядок CSV файлу як словник
+                                          #ключами словника є заголовки з першого рядка ("Назва", "Текст", "Теги")
+            notes.clear
+            window.notes_list.clear()
+
+            for row in reader: #перебираємо по кожному рядку з файлу (у вигляді словника row)
+                title = row["Назва"]
+                text = row["Текст"] #дістаємо значення по ключах "Назва", "Текст" і "Теги".
+
+                tags = row["Теги"].split() #.split() перетворює теговий рядок на список тегів.
+                                           #наприклад: "важливо робота" до ["важливо", "робота"]
+
+                notes.append[title, text, tags]
+                window.notes_list.addItem(title)
+        print("Замітки імпортовано з файлу notes.csv")
+    else:
+        print("Файл notes.csv не знайдено.")
+            
+
+#підключення функцій до кнопок
 window.notes_list.itemClicked.connect(show_note)
 window.btn_create_note.clicked.connect(add_note)
+window.btn_save_note.clicked.connect(save_note)
+window.btn_delete_note.clicked.connect(delete_note)
+
+window.btn_add_tag.clicked.connect(add_tag)
+window.btn_delete_tag.clicked.connect(delete_tag)
+window.btn_search_tag.clicked.connect(clear_tags)
+
+window.btn_export_csv.clicked.connect(export_to_csv)
+window.btn_import_csv.clicked.connect(import_from_csv)
 
 window.show()
 app.exec_()
