@@ -14,25 +14,25 @@ class SmartNotes(QWidget):
         self.resize(800, 600)
         app_style = """
             QWidget {
-                background-color: #f6fbe7; /* very light olive background */
+                background-color: #f6fbe7;
                 font-family: Arial;
                 font-size: 14px;
             }
 
             QPushButton {
-                background-color: #b5c99a;     /* light olive green */
-                border: 2px solid #7d8f69;     /* darker green border */
+                background-color: #b5c99a;
+                border: 2px solid #7d8f69;
                 border-radius: 10px;
                 padding: 6px 12px;
                 font-weight: bold;
             }
 
             QPushButton:hover {
-                background-color: #c9dbac;     /* hover effect */
+                background-color: #99af75;
             }
 
             QTextEdit, QLineEdit {
-                background-color: #ffffff;
+                background-color: rgb(204, 224, 183);
                 border: 2px solid #b5c99a;
                 border-radius: 8px;
                 padding: 4px;
@@ -45,11 +45,24 @@ class SmartNotes(QWidget):
                 padding: 4px;
             }
 
+            QListWidget::item:selected {
+                background-color: #a0e9a0;
+                color: black;
+            }
+
+            QListWidget::item:hover {
+                background-color:rgb(188, 207, 158);
+            }
+
             QLabel {
                 font-weight: bold;
                 color: #4f5d2f;
             }
         """
+        #border-radius - округлення країв
+        #padding - відступи всередині елемента, щоб текст не прилипав до країв 
+        #hover - ефект при наведенні миші
+
         self.setStyleSheet(app_style)
 
 
@@ -135,7 +148,7 @@ while True:
 #показ замітки при натисканні
 def show_note():
 
-    save_note() #зберігаємо замітку перед показом нової
+    #save_note() #зберігаємо замітку перед показом нової
 
     selected_items = window.notes_list.selectedItems() #отримуємо вибраний елемент
     if selected_items: #якщо вибрано елемент
@@ -148,6 +161,28 @@ def show_note():
                 
                 break #виходимо з циклу, якщо знайшли замітку для редагування
 
+def load_notes():
+    notes.clear() #очищаємо список notes
+    window.notes_list.clear() #очищаємо список заміток у графічному інтерфейсі
+
+    for i in range(100): #перебираємо файли з 0 до 99
+        filename = f"{i}.txt" #формуємо назву файлу
+        if os.path.exists(filename):
+            with open(filename, "r", encoding="utf-8") as file:
+                lines = file.readlines()
+                if len(lines) >= 3: #перевіряємо чи є в файлі хоча б 3 рядки
+                    #якщо так, то беремо перші три рядки
+                    title = lines[0].strip() #перше слово - назва
+                    text = lines[1].strip() #друге слово - текст
+                    tags_line = lines[2].strip() #третє слово - теги
+                    tags = tags_line.split(", ") if tags_line else [] #перетворюємо рядок тегів у список
+                    note = [title, text, tags] #формуємо замітку
+                    notes.append(note) 
+                    window.notes_list.addItem(title) #додаємо назву замітки до списку заміток
+    if notes: #якщо є замітки
+        window.notes_list.setCurrentRow(0) #вибираємо першу замітку в списку
+        show_note() #показуємо першу замітку
+
 #додавання нової замітки
 def add_note():
     note_name, ok = QInputDialog.getText(window, "Додати замітку", "Назва замітки:")
@@ -155,6 +190,9 @@ def add_note():
         new_note = [note_name, "", []] #нова замітка
         notes.append(new_note)
         window.notes_list.addItem(note_name)
+        window.notes_list.setCurrentItem(window.notes_list.item(len(notes) - 1)) #вибираємо нову замітку в списку щоб непотрібно було клікати
+        show_note() #показуємо нову замітку
+
         file_index = len(notes) - 1 #індекс нової замітки
         with open(f"{file_index}.txt", "w", encoding="utf-8") as file:
             file.write(note_name + "\n")
@@ -316,7 +354,7 @@ def import_from_csv(): #ця функція читає файл notes.csv
 
     if os.path.exists("notes.csv"):
         with open ("notes.csv", "r", encoding="utf-8") as file:
-            reader = csv.Dictreader(file) #DictReader читає кожен рядок CSV файлу як словник
+            reader = csv.DictReader(file) #DictReader читає кожен рядок CSV файлу як словник
                                           #ключами словника є заголовки з першого рядка ("Назва", "Текст", "Теги")
             notes.clear
             window.notes_list.clear()
@@ -328,8 +366,11 @@ def import_from_csv(): #ця функція читає файл notes.csv
                 tags = row["Теги"].split() #.split() перетворює теговий рядок на список тегів.
                                            #наприклад: "важливо робота" до ["важливо", "робота"]
 
-                notes.append[title, text, tags]
+                notes.append([title, text, tags])
                 window.notes_list.addItem(title)
+
+                show_note() #показуємо нову замітку
+
         print("Замітки імпортовано з файлу notes.csv")
     else:
         print("Файл notes.csv не знайдено.")
@@ -347,6 +388,8 @@ window.btn_search_tag.clicked.connect(clear_tags)
 
 window.btn_export_csv.clicked.connect(export_to_csv)
 window.btn_import_csv.clicked.connect(import_from_csv)
+
+load_notes()
 
 window.show()
 app.exec_()
