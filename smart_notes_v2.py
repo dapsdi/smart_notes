@@ -12,6 +12,46 @@ class SmartNotes(QWidget):
         super().__init__()
         self.setWindowTitle("Розумні Замітки")
         self.resize(800, 600)
+        app_style = """
+            QWidget {
+                background-color: #f6fbe7; /* very light olive background */
+                font-family: Arial;
+                font-size: 14px;
+            }
+
+            QPushButton {
+                background-color: #b5c99a;     /* light olive green */
+                border: 2px solid #7d8f69;     /* darker green border */
+                border-radius: 10px;
+                padding: 6px 12px;
+                font-weight: bold;
+            }
+
+            QPushButton:hover {
+                background-color: #c9dbac;     /* hover effect */
+            }
+
+            QTextEdit, QLineEdit {
+                background-color: #ffffff;
+                border: 2px solid #b5c99a;
+                border-radius: 8px;
+                padding: 4px;
+            }
+
+            QListWidget {
+                background-color: #ffffff;
+                border: 2px solid #b5c99a;
+                border-radius: 8px;
+                padding: 4px;
+            }
+
+            QLabel {
+                font-weight: bold;
+                color: #4f5d2f;
+            }
+        """
+        self.setStyleSheet(app_style)
+
 
         #основні елементи
         self.text_field = QTextEdit()
